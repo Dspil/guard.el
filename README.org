@@ -1,0 +1,139 @@
+* Overview
+
+~guard~ is an Emacs package for modular, hierarchical configuration management. It allows you to organize your Emacs configuration into sections with dependency tracking, inheritance, conditional loading, mutual exclusion, and live introspection tools.
+
+* 1. Basic Usage
+
+Call ~guard-initialize~ early in your ~init.el~. Then call ~guard-config~ to load the tweak-file. After that, wrap setup code in ~guard-section~ blocks:
+
+#+BEGIN_SRC emacs-lisp
+(require 'guard)
+(guard-initialize)
+(guard-config) ; Loads local tweaks from `guard-tweak-file`
+
+(guard-section ui ()
+  "Various ui options"
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1))
+
+(guard-section themes (:parents (ui))
+  (load-theme 'modus-vivendi t))
+#+END_SRC
+
+* 2. Section Definition
+
+A section is defined using the ~guard-section~ macro:
+
+#+BEGIN_SRC emacs-lisp
+(guard-section [name] (<options>)
+  <optional docstring>
+  <optional body>)
+#+END_SRC
+
+If a section starts with a string, that string acts as its docstring.
+
+* 3. Dependencies & Inheritance
+
+A section can have any number of parent sections.
+
+Sub-sections can be declared explicitly via ~:parents~:
+
+#+BEGIN_SRC emacs-lisp
+(guard-section lisp (:parents (programming))
+  (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode))
+#+END_SRC
+
+or implicitly by nesting ~guard-section~ blocks within each other:
+
+#+BEGIN_SRC emacs-lisp
+(guard-section programming ()
+  (guard-section lisp ()
+    (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode)))
+#+END_SRC
+
+** Key Principles
+- *Automatic Definition:* Parents do not have to be declared beforehand. If a section is first introduced as a parent of a section currently being defined, the parent is defined at that moment.
+- *Default Parent:* If a section has no explicit parents, its parent is either ~guard-parent-node~ or the wrapping section (the wrapping section has precedence).
+- *Transitive Inheritance:* A section wrapped in another section will always have the wrapping section as a (maybe transitive) parent.
+
+* 4. Allowing & Disallowing Sections
+
+Allowed sections will run during initialization, while disallowed sections will not.
+
+** Rules for Status
+- A section is *allowed* if it is *explicitly allowed* OR if *all* of its parents are allowed.
+- A section can also be *explicitly disallowed*, in which case it will not run.
+- All sections are transitive children of ~guard-parent-node~, which is allowed by default. Therefore, with no extra configuration, all sections are allowed.
+- Explicitly allowing/disallowing a section affects all transitive dependencies of that section.
+
+** Functions
+
+*** Explicitly Allowing Sections (~guard-allow~)
+
+#+BEGIN_SRC emacs-lisp
+(guard-allow (section1 ...)
+  <optional body>)
+#+END_SRC
+
+*** Explicitly Disallowing Sections (~guard-disallow~)
+
+#+BEGIN_SRC emacs-lisp
+(guard-disallow (section1 ...)
+  <optional body>)
+#+END_SRC
+
+Both operations accept an optional body that executes *after* explicitly allowing or disallowing the argument sections. This allows nesting logic cleanly:
+
+#+BEGIN_SRC emacs-lisp
+;; Disallow all programming languages except python
+(guard-disallow (programming-languages)
+  (guard-allow (python)))
+#+END_SRC
+
+Note that the block syntax above is equivalent to sequential calls:
+
+#+BEGIN_SRC emacs-lisp
+(guard-disallow (programming-languages))
+(guard-allow (python))
+#+END_SRC
+
+The optional body is provided as a visual convenience for logical grouping.
+
+* 5. Mutually Exclusive Sections
+
+A section can specify a ~:default-child~ attribute to create mutually exclusive (~xor~) behavior:
+
+#+BEGIN_SRC emacs-lisp
+(guard-section completion (:default-child vertico))
+#+END_SRC
+
+In this case, ~completion~ becomes a ~xor~ section, and all of its child sections will be disabled except ~vertico~.
+
+To override the selected child (as an alternative to using ~guard-allow~ / ~guard-disallow~), use ~guard-choose~:
+
+#+BEGIN_SRC emacs-lisp
+(guard-choose completion helm)
+#+END_SRC
+
+This makes ~helm~ the default selected child section instead.
+
+* 6. Overriding Sections
+
+You can modify or override the behavior of an existing section using ~guard-override~:
+
+#+BEGIN_SRC emacs-lisp
+(guard-override <place> <section>
+  <body>)
+#+END_SRC
+
+Valid values for ~<place>~:
+- ~before~ :: ~<body>~ runs *before* the code in the target section.
+- ~after~ :: ~<body>~ runs *after* the code in the target section.
+- ~over~ :: ~<body>~ runs *instead of* the code in the target section.
+
+* 7. Introspection
+
+Guard provides built-in interactive commands for inspecting your configuration graph and runtime status:
+
+- ~M-x guard-dot~ :: Opens the ~*guard-dot*~ buffer containing a Graphviz DOT representation of your configuration hierarchy, along with runtime execution details for each section.
+- ~M-x guard-look~ :: Inspects the status of a specific section along with its parent and child relationships.

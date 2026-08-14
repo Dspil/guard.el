@@ -4,6 +4,7 @@
 
 ;; Author: Dionisis Spiliopoulos <dennisspiliopoylos@gmail.com>
 ;; URL: https://github.com/Dspil/guard.el
+;; Version: 1.0.0
 ;; Keywords: convenience, initialization, profiles, tools
 ;; Package-Requires: ((emacs "29.1"))
 

@@ -256,7 +256,7 @@ Functions receive (SECTION PLACE).")
   "A section is allowed if it is explicitly set to be allowed or if *all* of its
 parents are allowed. If a direct parent of the section is a negative node, it
 has to be explicitly allowed. The CACHE should be a hash-table that also gets
-updated with 'allowed or 'disallowed values for bulk operations."
+updated with \='allowed or \='disallowed values for bulk operations."
   (let ((state (gethash section guard--sections-allowed))
         (cached-state (when cache (gethash section cache)))
         (neg-default (gethash section guard--neg-nodes)))
@@ -364,9 +364,10 @@ updated with 'allowed or 'disallowed values for bulk operations."
   `(setf (gethash ',section guard--neg-nodes) ',child))
 
 (defmacro guard-override (where name &rest body)
-  "Override the section with name NAME. WHERE can be 'over, 'before, 'after.
-If it is 'over, the whole section will be overriden. If it is 'before, the override code will run
-before the section. If it is 'after it will run after the section."
+  "Override the section with name NAME. WHERE can be \='over, \='before, \='after.
+If it is \='over, the whole section will be overriden. If it is \='before, the
+override code will run before the section. If it is \='after it will run after
+the section."
   (declare (indent defun))
   `(progn
      (puthash ',name (cons ',where ',body) guard--overrides)))
@@ -449,8 +450,9 @@ Below is a list of visual indicators in the graph.
 
 2. Node Border Style (Subgraphs):
    - Solid: No section is defined inside this section.
-   - Dashed: Sections are defined inside this section. These have this section as a parent by default.
-       The initialization time of this node has an overlap with the children defined inside it. 
+   - Dashed: Sections are defined inside this section. These have this section
+       as a parent by default. The initialization time of this node has an
+       overlap with the children defined inside it.
 
 2. Node Fill Color (Performance Heatmap):
    - Linear scale from Light Yellow-Orange (Fastest) to Red (Slowest)
@@ -573,19 +575,19 @@ Below is a list of visual indicators in the graph.
 
 (defun guard--back-button ()
   (let ((map (make-sparse-keymap))
-        (section (pop guard--node-look-history)))
+        (target-section (car guard--node-look-history))
+        (remaining-history (cdr guard--node-look-history)))
     (define-key map (kbd "RET")
                 (lambda ()
                   (interactive)
-                  (guard-look section guard--node-look-history)))
-    (propertize (format "[Back to %s]" section)
+                  (guard-look target-section remaining-history)))
+    (propertize (format "[Back to %s]" target-section)
                 'keymap map
                 'face '(underline link))))
 
 (defun guard-look (&optional name prev-history)
   (interactive)
-  (let ((history guard--node-look-history)
-        (section (or name
+  (let ((section (or name
                      (intern-soft
                       (completing-read "Section: "
                                        (hash-table-keys guard--section-graph) nil t)))))

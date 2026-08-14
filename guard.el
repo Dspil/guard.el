@@ -34,8 +34,8 @@
 ;; 1. BASIC USAGE
 ;; =============================================================================
 ;;
-;; Call `guard-initialize' early in your `init.el`. Then call `guard-config' to
-;; load the tweak-file. Then wrap setup code in `guard-section' blocks:
+;; Call `guard-initialize' early in your `init.el`.  Then call `guard-config' to
+;; load the tweak-file.  Then wrap setup code in `guard-section' blocks:
 ;;
 ;;   (require 'guard)
 ;;   (guard-initialize)
@@ -70,16 +70,16 @@
 ;;
 ;; Sub-sections can be declared explicitly via `:parents':
 ;;
-;;   (guard-section lisp (:parents (programming))
+;;   (guard-section Lisp (:parents (programming))
 ;;       (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode))
 ;;
 ;; or implicitly by nesting `guard-section` blocks within each other:
 ;;
 ;;   (guard-section programming ()
-;;     (guard-section lisp ()
+;;     (guard-section Lisp ()
 ;;       (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode)))
 ;;
-;; The parents don't have to be declared beforehand. If a section is first
+;; The parents don't have to be declared beforehand.  If a section is first
 ;; introduced as a parent of a section currently being defined, the parent is
 ;; also defined at that moment.
 ;;
@@ -100,7 +100,7 @@
 ;; A section can also be *explicitly disallowed* in which case it is disallowed.
 ;;
 ;; All sections are transitive children of guard-parent-node which is by default
-;; allowed. This means that with no configuration, all sections are allowed.
+;; allowed.  This means that with no configuration, all sections are allowed.
 ;; Explicitly allowing/disallowing some section has the effect of allowing or
 ;; disallowing all transitive dependencies of the section.
 ;;
@@ -165,7 +165,7 @@
 ;; =============================================================================
 ;;
 ;; Run `M-x guard-dot` to open the `*guard-dot*` buffer containing a Graphviz DOT
-;; representation of your configuration hierarchy. This also contains runtime
+;; representation of your configuration hierarchy.  This also contains runtime
 ;; information for each section during initialization.
 ;;
 ;; Run `M-x guard-look` to inspect the status of a section along with its
@@ -381,9 +381,9 @@ updated with \='allowed or \='disallowed values for bulk operations."
   `(setf (gethash ',section guard--neg-nodes) ',child))
 
 (defmacro guard-override (where name &rest body)
-  "Override the section with name NAME. WHERE can be \='over, \='before, \='after.
-If it is \='over, the whole section will be overriden. If it is \='before, the
-override code will run before the section. If it is \='after it will run after
+  "Override the section with name NAME.  WHERE can be \='over, \='before, \='after.
+If it is \='over, the whole section will be overriden.  If it is \='before, the
+override code will run before the section.  If it is \='after it will run after
 the section."
   (declare (indent defun))
   `(progn

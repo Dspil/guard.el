@@ -173,8 +173,8 @@
 ;;
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl-lib))
+(require 'cl-lib)
+(require 'subr-x)
 
 ;; Guard group and customizable variables
 
@@ -497,8 +497,8 @@ Below is a list of visual indicators in the graph.
   (insert "\n")
   (let* ((cache (make-hash-table))
          (times (hash-table-values guard--init-times))
-         (max-time (apply 'max times))
-         (min-time (apply 'min times))
+         (max-time (apply #'max times))
+         (min-time (apply #'min times))
          (time-range (max 0.000001 (- max-time min-time))))
     (insert (guard--dot-legend min-time max-time))
     (cl-loop for section being the hash-keys of guard--section-graph

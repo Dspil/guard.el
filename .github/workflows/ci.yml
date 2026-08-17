@@ -43,5 +43,5 @@ jobs:
           emacs -Q --batch \
             -L . \
             -L tests \
-            -l tests/guard-tests.el \
+            -l guard-tests.el \
             -f ert-run-tests-batch-and-exit

@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        emacs-version: ['29.1', '29.4', 'snapshot']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Emacs
+        uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs-version }}
+
+      - name: Run Checkdoc
+        run: |
+          emacs -Q --batch \
+            --eval '(require '\''checkdoc)' \
+            --eval '(checkdoc-file "guard.el")' \
+            --eval '(when (get-buffer "*Style Warnings*") \
+                      (princ (with-current-buffer "*Style Warnings*" (buffer-string))) \
+                      (kill-emacs 1))'
+
+      - name: Byte-compile (Fail on Warnings)
+        run: |
+          emacs -Q --batch -L . \
+            --eval "(setq byte-compile-error-on-warn t)" \
+            -f batch-byte-compile guard.el
+
+      - name: Run ERT Tests
+        run: |
+          emacs -Q --batch \
+            -L . \
+            -L tests \
+            -l tests/guard-tests.el \
+            -f ert-run-tests-batch-and-exit

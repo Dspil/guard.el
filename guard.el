@@ -230,18 +230,25 @@ Functions receive (SECTION PLACE).")
 
 ;; Graph logic
 (defun guard--section-parents (section)
+  "Get SECTION parents."
   (car (gethash section guard--section-graph)))
 
 (defun guard--section-children (section)
+  "Get SECTION children."
   (cdr (gethash section guard--section-graph)))
 
 (defun guard--has-parent (section parent &optional parents)
+  "Check if SECTION has PARENT.
+If PARENTS is defined consider those as well."
   (cond
    ((eq section guard-parent-section) nil)
    ((member parent (or parents (guard--section-parents section))) t)
    (t (cl-some (lambda (p) (guard--has-parent p parent)) (or parents (guard--section-parents section))))))
 
 (defun guard--graph-add-section (section maybe-parents file &optional parent-mode)
+  "Add SECTION to the graph.
+MAYBE-PARENTS are its parents or nil.  SECTION was defined in FILE.
+PARENT-MODE exists only for the recursive call and should not be set."
   (when (gethash section guard--section-graph)
     (error "Duplicate section %s\n" section))
   ;; Handle position data.
@@ -270,9 +277,12 @@ Functions receive (SECTION PLACE).")
 ;; ================
 
 (defun guard--is-allowed (section &optional cache parent-mode from-child)
-  "A section is allowed if it is explicitly set to be allowed or if *all* of its
-parents are allowed. If a direct parent of the section is a negative node, it
-has to be explicitly allowed. The CACHE should be a hash-table that also gets
+  "Check whether SECTION is allowed.
+CACHE is a hash-table with other sections found to be allowed.
+PARENT-MODE and FROM-CHILD are for the recursive call and should not be set.
+A section is allowed if it is explicitly set to be allowed or if *all* of its
+parents are allowed.  If a direct parent of the section is a negative node, it
+has to be explicitly allowed.  The CACHE should be a hash-table that also gets
 updated with \='allowed or \='disallowed values for bulk operations."
   (let ((state (gethash section guard--sections-allowed))
         (cached-state (when cache (gethash section cache)))
@@ -304,6 +314,13 @@ updated with \='allowed or \='disallowed values for bulk operations."
 ;; ===
 
 (defmacro guard-section (name options &rest body)
+  "The section macro.
+NAME is the name of the section.
+OPTIONS can be:
+  - :parents: a list of parent sections.
+  - :default-child: converts the section to a `xor` section and defines its
+    default child.
+BODY is arbitrary code."
   (declare (indent defun)
            (doc-string 3))
   (let ((file (macroexp-file-name))
@@ -341,6 +358,8 @@ updated with \='allowed or \='disallowed values for bulk operations."
              (pop guard--node-stack)))))))
 
 (defmacro guard-param (name &rest body)
+  "Define a parameter of the surrounding section.
+NAME is its identifier and BODY is arbitrary code."
   (let ((override (make-symbol "override"))
         (param-body (make-symbol "param-body")))
     `(let ((,override (and guard--node-stack (gethash (car guard--node-stack) guard--node-params))))
@@ -352,6 +371,9 @@ updated with \='allowed or \='disallowed values for bulk operations."
          ,@body))))
 
 (defmacro guard-parameterize (name &rest body)
+  "Set the parameters of section with name NAME.
+BODY is comprised of expressions of the form (param-name sub), for
+replacing the parameter with name param-name with sub."
   (declare (indent 1))
   (unless (gethash name guard--node-params)
     (setf (gethash name guard--node-params) (make-hash-table)))
@@ -362,6 +384,10 @@ updated with \='allowed or \='disallowed values for bulk operations."
              (setf (gethash param-name params) param-body))))
 
 (defmacro guard-allow (sections &rest body)
+  "Allow one or more SECTIONS.
+SECTIONS can be either a section name or a list of section names.
+After that, BODY can be arbitrary code that will be executed after
+allowing the SECTIONS."
   (declare (indent defun))
   (let ((secs (if (listp sections) sections (list sections))))
     `(progn
@@ -370,6 +396,10 @@ updated with \='allowed or \='disallowed values for bulk operations."
        ,@body)))
 
 (defmacro guard-disallow (sections &rest body)
+  "Disallow one or more SECTIONS.
+SECTIONS can be either a section name or a list of section names.
+After that, BODY can be arbitrary code that will be executed after
+disallowing the SECTIONS."
   (declare (indent defun))
   (let ((secs (if (listp sections) sections (list sections))))
     `(progn
@@ -378,6 +408,7 @@ updated with \='allowed or \='disallowed values for bulk operations."
        ,@body)))
 
 (defmacro guard-choose (section child)
+  "Set the default CHILD of a xor SECTION."
   `(setf (gethash ',section guard--neg-nodes) ',child))
 
 (defmacro guard-override (where name &rest body)
@@ -392,6 +423,7 @@ the section."
 ;; guard utils
 
 (defun guard-config ()
+  "Safely load the tweak file."
   (when (file-exists-p guard-tweak-file)
     (load guard-tweak-file)))
 
@@ -413,6 +445,7 @@ the section."
     (replace-regexp-in-string "\\.0\\([smh]\\)" "\\1" str)))
 
 (defun guard--section-time (section)
+  "Return the formatted initalization time of SECTION."
   (guard--format-duration (gethash section guard--init-times)))
 
 (defun guard--get-heatmap-color (ratio)
@@ -427,6 +460,7 @@ RATIO is a float between 0.0 (fastest) and 1.0 (slowest)."
     (format "#%02x%02x%02x" r g b)))
 
 (defun guard--dot-legend (min-time max-time)
+  "Return a heatmap legend for the dot plot between MIN-TIME and MAX-TIME."
   (format "    labelloc=\"b\";
     labeljust=\"c\";
 
@@ -467,8 +501,8 @@ Below is a list of visual indicators in the graph.
 
 2. Node Border Style (Subgraphs):
    - Solid: No section is defined inside this section.
-   - Dashed: Sections are defined inside this section. These have this section
-       as a parent by default. The initialization time of this node has an
+   - Dashed: Sections are defined inside this section.  These have this section
+       as a parent by default.  The initialization time of this node has an
        overlap with the children defined inside it.
 
 2. Node Fill Color (Performance Heatmap):
@@ -545,6 +579,7 @@ Below is a list of visual indicators in the graph.
 ;; section lookup
 
 (defun guard--link-to-node (section)
+  "Make a link to where SECTION is defined for guard-look."
   (let* ((data (gethash section guard--node-places))
          (place (car data))
          (is-parent (cdr data))
@@ -568,6 +603,7 @@ Below is a list of visual indicators in the graph.
                 'face '(underline))))
 
 (defun guard--enabled-status (section)
+  "Return a string explaining the status of SECTION."
   (let ((explicit (gethash section guard--sections-allowed)))
     (cond
      ((eq explicit 'allowed) "explicitly allowed")
@@ -575,11 +611,13 @@ Below is a list of visual indicators in the graph.
      (t (if (guard--is-allowed section) "allowed" "disallowed")))))
 
 (defun guard--node-type (section)
+  "Format the node type of SECTION."
   (if (gethash section guard--neg-nodes)
       "xor"
     "normal"))
 
 (defun guard--node-link (section)
+  "Make a button to guard-look SECTION."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "RET")
                 (lambda ()
@@ -591,6 +629,7 @@ Below is a list of visual indicators in the graph.
                 'face '(underline link))))
 
 (defun guard--back-button ()
+  "Create the BACK button for guard-look."
   (let ((map (make-sparse-keymap))
         (target-section (car guard--node-look-history))
         (remaining-history (cdr guard--node-look-history)))
@@ -603,6 +642,9 @@ Below is a list of visual indicators in the graph.
                 'face '(underline link))))
 
 (defun guard-look (&optional name prev-history)
+  "Show information about a section.
+If NAME is nil, ask for it with `completing-read`.
+PREV-HISTORY is holding history for the back button."
   (interactive)
   (let ((section (or name
                      (intern-soft

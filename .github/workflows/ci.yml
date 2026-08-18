@@ -25,12 +25,16 @@ jobs:
 
       - name: Run Checkdoc
         run: |
+      - name: Run Checkdoc
+        run: |
           emacs -Q --batch \
             --eval '(require '\''checkdoc)' \
-            --eval '(checkdoc-file "guard.el")' \
-            --eval '(when (get-buffer "*Style Warnings*") \
-                      (princ (with-current-buffer "*Style Warnings*" (buffer-string))) \
-                      (kill-emacs 1))'
+            --eval '(let ((buf (find-file-noselect "guard.el"))) \
+                      (with-current-buffer buf \
+                        (checkdoc-current-buffer t)) \
+                      (when (get-buffer "*Style Warnings*") \
+                        (princ (with-current-buffer "*Style Warnings*" (buffer-string))) \
+                        (kill-emacs 1)))'
 
       - name: Byte-compile (Fail on Warnings)
         run: |

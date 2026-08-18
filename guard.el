@@ -173,7 +173,7 @@
 ;;
 ;;; Code:
 
-;(require 'cl-lib)
+(require 'cl-lib)
 (require 'subr-x)
 
 ;; Guard group and customizable variables
@@ -247,7 +247,7 @@ If PARENTS is defined consider those as well."
 
 (defun guard--graph-add-section (section maybe-parents file &optional parent-mode)
   "Add SECTION to the graph.
-MAYBE-PARENTS are its parents or nil.  SECTION was defined in FILE.
+MAYBE-PARENTS are its parents or nil. SECTION was defined in FILE.
 PARENT-MODE exists only for the recursive call and should not be set."
   (when (gethash section guard--section-graph)
     (error "Duplicate section %s\n" section))

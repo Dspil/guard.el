@@ -29,11 +29,11 @@ jobs:
         run: |
           emacs -Q --batch \
             --eval '(require '\''checkdoc)' \
-            --eval '(let ((buf (find-file-noselect "guard.el"))) \
-                      (with-current-buffer buf \
-                        (checkdoc-current-buffer t)) \
-                      (when (get-buffer "*Style Warnings*") \
-                        (princ (with-current-buffer "*Style Warnings*" (buffer-string))) \
+            --eval '(let ((buf (find-file-noselect "guard.el")))
+                      (with-current-buffer buf
+                        (checkdoc-current-buffer t))
+                      (when (get-buffer "*Style Warnings*")
+                        (princ (with-current-buffer "*Style Warnings*" (buffer-string)))
                         (kill-emacs 1)))'
 
       - name: Byte-compile (Fail on Warnings)

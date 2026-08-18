@@ -25,8 +25,6 @@ jobs:
 
       - name: Run Checkdoc
         run: |
-      - name: Run Checkdoc
-        run: |
           emacs -Q --batch \
             --eval '(require '\''checkdoc)' \
             --eval '(let ((buf (find-file-noselect "guard.el")))

@@ -20,7 +20,7 @@ jobs:
     - name: Run
       env:
         LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (shx :fetcher github :repo "Dspil/guard.el")
+        RECIPE: (guard :fetcher github :repo "Dspil/guard.el")
         WARN_IS_ERROR: true
         EXIST_OK: false
       run: echo $GITHUB_REF && make -C ~/melpazoid

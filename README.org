@@ -1,4 +1,5 @@
 [[https://github.com/Dspil/guard.el/actions/workflows/ci.yml][https://github.com/Dspil/guard.el/actions/workflows/ci.yml/badge.svg]]
+[[https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml][https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml/badge.svg]]
 * Overview
 
 ~guard~ is an Emacs package for modular, hierarchical configuration management. It allows you to organize your Emacs configuration into sections with dependency tracking, inheritance, conditional loading, mutual exclusion, and live introspection tools.

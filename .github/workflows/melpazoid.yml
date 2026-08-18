@@ -1,0 +1,26 @@
+name: melpazoid
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with: { python-version: '3.10' }
+    - name: Install
+      run: |
+        sudo apt-get install emacs && emacs --version
+        git clone https://github.com/riscy/melpazoid.git ~/melpazoid
+    - name: Run
+      env:
+        LOCAL_REPO: ${{ github.workspace }}
+        RECIPE: (shx :fetcher github :repo "Dspil/guard.el")
+        WARN_IS_ERROR: true
+        EXIST_OK: false
+      run: echo $GITHUB_REF && make -C ~/melpazoid

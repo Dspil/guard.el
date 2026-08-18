@@ -37,6 +37,28 @@ jobs:
             --eval "(setq byte-compile-error-on-warn t)" \
             -f batch-byte-compile guard.el
 
+      - name: Run package-lint
+        run: |
+          emacs -Q --batch \
+            --eval '(require '\''package)' \
+            --eval '(add-to-list '\''package-archives '\''("melpa" . "https://melpa.org/packages/") t)' \
+            --eval '(package-initialize)' \
+            --eval '(unless (package-installed-p '\''package-lint) (package-refresh-contents) (package-install '\''package-lint))' \
+            -f package-lint-batch-and-exit guard.el
+  
+      - name: Run Melpazoid
+        run: |
+          git clone https://github.com/riscy/melpazoid.git /tmp/melpazoid
+          OUTPUT=$(emacs -Q --batch \
+            -L . \
+            -L /tmp/melpazoid \
+            -l /tmp/melpazoid/melpazoid.el \
+            --eval '(melpazoid-file "guard.el")' 2>&1)
+          if [ -n "$OUTPUT" ]; then
+            echo "$OUTPUT"
+            exit 1
+          fi
+
       - name: Run ERT Tests
         run: |
           emacs -Q --batch \

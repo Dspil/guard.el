@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Emacs
         uses: purcell/setup-emacs@master
@@ -25,18 +25,26 @@ jobs:
 
       - name: Run Checkdoc
         run: |
-          emacs -Q --batch \
-            --eval '(require '\''checkdoc)' \
-            --eval '(checkdoc-file "guard.el")' \
-            --eval '(when (get-buffer "*Style Warnings*") \
-                      (princ (with-current-buffer "*Style Warnings*" (buffer-string))) \
-                      (kill-emacs 1))'
+          OUTPUT=$(emacs -Q --batch --eval '(checkdoc-file "guard.el")' 2>&1)
+          if [ -n "$OUTPUT" ]; then
+            echo "$OUTPUT"
+            exit 1
+          fi
 
       - name: Byte-compile (Fail on Warnings)
         run: |
           emacs -Q --batch -L . \
             --eval "(setq byte-compile-error-on-warn t)" \
             -f batch-byte-compile guard.el
+
+      - name: Run package-lint
+        run: |
+          emacs -Q --batch \
+            --eval '(require '\''package)' \
+            --eval '(add-to-list '\''package-archives '\''("melpa" . "https://melpa.org/packages/") t)' \
+            --eval '(package-initialize)' \
+            --eval '(unless (package-installed-p '\''package-lint) (package-refresh-contents) (package-install '\''package-lint))' \
+            -f package-lint-batch-and-exit guard.el
 
       - name: Run ERT Tests
         run: |

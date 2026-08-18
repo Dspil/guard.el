@@ -45,7 +45,7 @@ jobs:
             --eval '(package-initialize)' \
             --eval '(unless (package-installed-p '\''package-lint) (package-refresh-contents) (package-install '\''package-lint))' \
             -f package-lint-batch-and-exit guard.el
-  
+
       - name: Run Melpazoid
         run: |
           git clone https://github.com/riscy/melpazoid.git /tmp/melpazoid

@@ -173,7 +173,7 @@
 ;;
 ;;; Code:
 
-;(require 'cl-lib)
+(require 'cl-lib)
 (require 'subr-x)
 
 ;; Guard group and customizable variables

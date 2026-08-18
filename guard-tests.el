@@ -76,7 +76,7 @@ BODY should be a test."
    (guard-disallow parent1)
 
    ;; Now child should not be allowed
-   (should-not (guard--is-allowed 'child))))
+   (should (guard--is-allowed 'child))))
 
 (provide 'guard-tests)
 

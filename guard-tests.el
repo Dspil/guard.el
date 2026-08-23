@@ -78,6 +78,61 @@ BODY should be a test."
    ;; Now child should not be allowed
    (should-not (guard--is-allowed 'child))))
 
+(ert-deftest guard-test-transitive-inheritance ()
+  "Test transitive inheritance scenario."
+  (guard-with-clean-state
+   (guard-section grandparent ())
+   (guard-section parent (:parents (grandparent)))
+   (guard-section child (:parents (parent)))
+   (guard-section grandchild (:parents (child)))
+
+   ;; Disable the grandparent
+   (guard-disallow grandparent)
+
+   ;; Grandchild should be disabled
+   (should-not (guard--is-allowed 'grandchild))))
+
+(ert-deftest guard-test-duplicate-section-error ()
+  "Test throwing an error on duplicate sections."
+  (guard-with-clean-state
+   (guard-section foo ())
+   (should-error
+    (guard-section foo ()))))
+
+(ert-deftest guard-test-disallow-overriding ()
+  "Test overriding a disallow."
+  (guard-with-clean-state
+   (guard-section foo ())
+   ;; Disable the section
+   (guard-disallow foo)
+
+   ;; Enable the section
+   (guard-allow foo)
+
+   ;; Section should be enabled
+   (should (guard--is-allowed 'foo))))
+
+(ert-deftest guard-test-allowed-executes ()
+  "Test whether an allowed section executes."
+  (guard-with-clean-state
+   (let ((flag nil))
+
+     ;; foo is allowed by default
+     (guard-section foo ()
+       (setq flag t))
+     (should flag))))
+
+(ert-deftest guard-test-disallowed-does-not-execute ()
+  "Test whether an allowed section executes."
+  (guard-with-clean-state
+   (let ((flag t))
+
+     ;; Disallow foo
+     (guard-disallow foo)
+     (guard-section foo ()
+       (setq flag nil))
+     (should flag))))
+
 (provide 'guard-tests)
 
 ;;; guard-tests.el ends here

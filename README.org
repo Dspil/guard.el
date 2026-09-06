@@ -1,4 +1,3 @@
-#+OPTIONS: toc:2
 [[https://github.com/Dspil/guard.el/actions/workflows/ci.yml][https://github.com/Dspil/guard.el/actions/workflows/ci.yml/badge.svg]]
 [[https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml][https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml/badge.svg]]
 [[https://melpa.org/#/guard][file:https://melpa.org/packages/guard-badge.svg]]
@@ -14,7 +13,16 @@
 * Table of Contents :TOC:
 - [[#overview][Overview]]
 - [[#motivation][Motivation]]
+  - [[#example][Example]]
+  - [[#what-now][What now?]]
 - [[#usage][Usage]]
+  - [[#quickstart-basic-usage][Quickstart (Basic Usage)]]
+  - [[#section-definition][Section Definition]]
+  - [[#dependencies--inheritance][Dependencies & Inheritance]]
+  - [[#allowing--disallowing-sections][Allowing & Disallowing Sections]]
+  - [[#mutually-exclusive-sections][Mutually Exclusive Sections]]
+  - [[#overriding-sections][Overriding Sections]]
+  - [[#introspection][Introspection]]
 
 * Motivation
 I wrote ~guard~ to make my life easier in sharing my init file across machines and time.

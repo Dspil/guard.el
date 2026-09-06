@@ -12,16 +12,23 @@
 
 * Motivation
 I wrote ~guard~ to make my life easier in sharing my init file across machines and time.
+
 My init is getting quite large (for my taste). I like having it in a github repo to share it across machines and whenever I change something, I can sync all machines easily by pulling.
+
 Each machine however needs some customization on top of that. Initially I would have an extra ~local-init.el~ loaded at the end of my init but I started wanting to *override* arbitrary sections of my initialization.
+
 Also some machines don't even need all of the packages/customization I have in my config. For example, I might only want org-related sections on one machine because I don't code there and I only want it for notes. So I would like to be able to *enable* and *disable* parts of my configuration.
+
 Enabling and disabling sections of the configuration was also appealing to me because I like to experiment with various programming languages and packages but, realistically, I won't be using them almost ever after I configure and play around a bit. But I don't want to remove that customization code because "what if I play with BQN again in the future?". The solutions is to just disable it until I need it again.
+
 In fact, why not go one step further on the enabling/disabling front? Sometimes I want to have everything enabled by default and disable some sections of my configuration. Other times I want everything disabled by default and only selectively enable some sections of it. And it would also be nice if I could mix and match this behavior in different parts of the configuration.
 Lastly, I like to try different packages/configurations achieving the same purpose but I don't want to delete the one I am not going with for now because I might change my mind. I would like the ability to *choose* between *mutually exclusive* alternatives and keep everything but the selected one disabled.
+
 With this package I can achieve all of the above, and build some more nice quality of life features on top since I am creating the infrastructure.
 
 ** Example
 I can split my configuration into sections. Sections can contain any piece of emacs lisp that I think tries to achieve some uniform purpose. Then I can define various operations on those sections on a different file I call the /tweak file/ which I just have to load before I load my config.
+
 For example I have a section for configuring latex exporting for org-mode which I call ~org-latex~ and a section configuring org roam which I call ~org-roam~ (I know, fantastic names). I can name 'parents' to these sections and a very suitable parent is the section ~org~ (which doesn't have to exist or contain code, look at usage). Now If I am in a situation where I want to enable everything ~org~ related I can just:
 #+begin_src emacs-lisp
   (guard-allow org)

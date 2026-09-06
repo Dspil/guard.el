@@ -34,13 +34,13 @@ For example, I have a section for configuring latex exporting for org-mode, whic
 #+begin_src emacs-lisp
   (guard-allow org)
 #+end_src
-Allowing ~org~ will enable it and also enable all of its children transitively (look at the usage below for all of the rules). Everything is enabled by default so allowing org won't be needed if we haven't disabled any of its parents.
+Allowing ~org~ will enable it and also enable all of its children transitively (look at the usage below for all of the rules). Everything is enabled by default, so allowing ~org~ won't be needed if we haven't disabled any of its parents.
 Do I want to disallow everything org-related but only enable org-roam (for some reason)?
 #+begin_src emacs-lisp
   (guard-disallow org
     (guard-allow org-roam))
 #+end_src
-I chose to allow nesting these statements to visually highlight the fact that we are trying to say "from org allow org-roam". The same though could be achieved by:
+I chose to allow nesting these statements to visually highlight the fact that we are trying to say "from org allow org-roam". The same could be achieved by:
 #+begin_src emacs-lisp
   (guard-disallow org)
   (guard-allow org-roam)
@@ -50,7 +50,7 @@ Now let's say I have a machine where all these are allowed, but my latex export 
   (guard-override over org-latex
     (my-awesome-new-org-latex-config))
 #+end_src
-and ~org-latex~ is replaced completely with the new config. What if I want to keep it but also prepend something to that section:
+and ~org-latex~ is replaced completely with the new config. If I want to keep it, but also prepend something to that section:
 #+begin_src emacs-lisp
   (guard-override before org-latex
     (my-crucial-before-org-latex-config))
@@ -58,11 +58,11 @@ and ~org-latex~ is replaced completely with the new config. What if I want to ke
 and using ~after~ works too in the opposite case.
 
 ** What now?
-We have some nice infrastructure we can build some stuff on (and ideas are always welcome). So far these are:
-- Mutually exclusive sections: A section can be defined as a ~xor~ section with some default child. All other children are automatically disabled. Of course the default child can be re-selected in the tweak file.
-- Parameters: Named parameters in sections that can be explicitly overridden. Wait, can't you achieve the same with just a nested section? Yes, but it has to have a global unique name (instead of, for example, ~path~ which is a nice parameter for many sections at least in my case). It also allows for a nice macro to set any or all parameters of a section efficiently without needing to override.
-- Graph visualization: I like to see my config and all the parent/child relationships. Calling ~guard-dot~ prints a dot version of the config which can later be rendered. The graph also contains init-time information per section. [[file:images/dot.png][Look at my config graph]] as an example (feel free to dislike the init, but the graph looks cool!).
-- More introspection: Calling ~guard-look~ and selecting a section jumps you to a buffer explaining what is up with that section, including its docstring, its status (enabled/disabled), parents and children.
+We have some nice infrastructure we can build some stuff on top of (and ideas are always welcome). So far these are:
+- Mutually exclusive sections: A section can be defined as a ~xor~ section with some default child. All other children are automatically disabled. Of course, the default child can be re-selected in the tweak file.
+- Parameters: Named parameters in sections that can be explicitly overridden. Wait, can't you achieve the same with just a nested section? Yes, but it has to have a global unique name (instead of, for example, ~path~, which is a nice parameter for many sections, at least in my case). It also allows for a nice macro to set any or all parameters of a section efficiently, without needing to override.
+- Graph visualization: I like to see my config and all the parent/child relationships. Calling ~guard-dot~ prints a dot version of the config, which can later be rendered. The graph also contains init-time information per section. [[file:images/dot.png][Look at my config graph]] as an example (feel free to dislike the init, but the graph looks cool!).
+- More introspection: Calling ~guard-look~ and selecting a section jumps to a buffer explaining what is up with that section, including its docstring, its status (enabled/disabled), parents and children.
 
 * Usage
 

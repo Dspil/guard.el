@@ -11,6 +11,11 @@
 /Note: The first question I am always asked is "Why not use use-package?". ~guard~ is not a replacement, it is orthogonal and handles higher-level section management. In fact, my config uses both ~guard~ and ~use-package~ together./
 #+end_quote
 
+* Table of Contents :TOC:
+- [[#overview][Overview]]
+- [[#motivation][Motivation]]
+- [[#usage][Usage]]
+
 * Motivation
 I wrote ~guard~ to make my life easier in sharing my init file across machines and time.
 

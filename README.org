@@ -1,5 +1,6 @@
 [[https://github.com/Dspil/guard.el/actions/workflows/ci.yml][https://github.com/Dspil/guard.el/actions/workflows/ci.yml/badge.svg]]
 [[https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml][https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml/badge.svg]]
+[[https://melpa.org/#/guard][file:https://melpa.org/packages/guard-badge.svg]]
 
 * Overview
 

@@ -1,3 +1,4 @@
+#+OPTIONS: toc:2
 [[https://github.com/Dspil/guard.el/actions/workflows/ci.yml][https://github.com/Dspil/guard.el/actions/workflows/ci.yml/badge.svg]]
 [[https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml][https://github.com/Dspil/guard.el/actions/workflows/melpazoid.yml/badge.svg]]
 [[https://melpa.org/#/guard][file:https://melpa.org/packages/guard-badge.svg]]
@@ -66,22 +67,24 @@ We have some nice infrastructure we can build some stuff on top of (and ideas ar
 
 * Usage
 
-** Basic Usage
+** Quickstart (Basic Usage)
 
-Call ~guard-initialize~ early in your ~init.el~. Then call ~guard-config~ to load the tweak-file. After that, wrap setup code in ~guard-section~ blocks:
+Call ~guard-initialize~ early in your ~init.el~. Then call ~guard-config~ to load the tweak-file. After that, wrap setup code in ~guard-section~ blocks.
+Any allowing, disallowing or overriding has to happen *before* the main configuration. For ease of use, put all of the allowing, disallowing and overriding in the init-tweak file.
+As an example, this is the core of my init.el (skipping loading ~use-package~ and enabling MELPA).
 
 #+BEGIN_SRC emacs-lisp
-(require 'guard)
-(guard-initialize)
-(guard-config) ; Loads local tweaks from `guard-tweak-file`
+  (use-package guard
+    :ensure t)
 
-(guard-section ui ()
-  "Various ui options"
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1))
-
-(guard-section themes (:parents (ui))
-  (load-theme 'modus-vivendi t))
+  ;; Initialize the graph, has to be called before `guard-config`.
+  (guard-initialize)
+  ;; Load the tweak file where enabling, disabling, overriding happens.
+  (guard-config)
+  ;; The main configuration where the sections live.
+  ;; Mine is in a large org file so I load it.
+  (org-babel-load-file
+   (expand-file-name "resources/config/myinit.org" user-emacs-directory)) ;
 #+END_SRC
 
 Note that ~guard-config~ loads ~(locate-user-emacs-file "init-tweak.el")~ by default. This is customizable via the ~guard-tweak-file~ variable.

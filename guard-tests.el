@@ -17,7 +17,8 @@ BODY should be a test."
          (guard--nodes-with-subgraph (make-hash-table))
          (guard--node-places (make-hash-table))
          (guard--node-docs (make-hash-table))
-         (guard--node-params (make-hash-table)))
+         (guard--node-params (make-hash-table))
+         (guard--prototyping nil))
      (guard-initialize)
      ,@body))
 
@@ -105,6 +106,16 @@ BODY should be a test."
    (guard-start-prototyping)
    (guard-section foo ())
    (guard-section foo ())))
+
+(ert-deftest guard-test-stop-prototyping ()
+  "Test suppressing duplicate section error."
+  (guard-with-clean-state
+   (guard-start-prototyping)
+   (guard-section foo ())
+   (guard-section foo ())
+   (guard-stop-prototyping)
+   (should-error
+    (guard-section foo ()))))
 
 (ert-deftest guard-test-disallow-overriding ()
   "Test overriding a disallow."

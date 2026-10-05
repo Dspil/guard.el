@@ -241,6 +241,7 @@
 (defvar guard--node-docs (make-hash-table) "Holds docstrings of sections.")
 (defvar guard--node-params (make-hash-table) "Holds parameter overrides of nodes.")
 (defvar guard--allow-conditions (make-hash-table) "Holds the allow conditions of nodes.")
+(defvar guard--prototyping nil)
 (defvar-local guard--node-look-history '() "History for back button in `guard-look'.")
 (defvar-local guard--node-looked nil "Section currently looked at.")
 (defvar guard-after-jump-to-section-functions nil
@@ -268,7 +269,8 @@ If PARENTS is defined consider those as well."
   "Add SECTION to the graph.
 MAYBE-PARENTS are its parents or nil.  SECTION was defined in FILE.
 PARENT-MODE exists only for the recursive call and should not be set."
-  (when (gethash section guard--section-graph)
+  (when (and (gethash section guard--section-graph)
+             (not guard--prototyping))
     (error "Duplicate section %s\n" section))
   ;; Handle position data.
   (setf (gethash section guard--node-places) (cons file parent-mode))
@@ -716,6 +718,21 @@ PREV-HISTORY is holding history for the back button."
       (insert "\n")
       (insert (guard--back-button)))
     (read-only-mode nil)))
+
+;; disable/enable duplicate section error
+
+(defun guard-start-prototyping ()
+  "Disables the duplicate-section error.  This should be used with caution since
+with this enabled, it is possible to create circular dependencies."
+  (interactive)
+  (setq guard--prototyping t))
+
+(defun guard-stop-prototyping ()
+  "Enables the duplicate-section error again.  It is adviced to leave call
+this after prototyping the config ends to catch possible circular
+dependencies in new parts of the configuration."
+  (interactive)
+  (setq guard--prototyping nil))
 
 ;; initialization method
 

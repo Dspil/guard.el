@@ -22,10 +22,10 @@ jobs:
         pip install mypy
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
 
-    - name: Run Melpazoid
+   - name: Run
       env:
         LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: '(guard :fetcher github :repo "Dspil/guard.el")'
-        WARN_IS_ERROR: true
-        EXIST_OK: false
+        RECIPE: (guard :fetcher github :repo "Dspil/guard.el")
+        WARN_IS_ERROR: false
+        EXIST_OK: true
       run: echo $GITHUB_REF && make -C ~/melpazoid

@@ -67,7 +67,7 @@
 ;;   - `:default-child': for mutually exclusive nodes we pick the allowed one
 ;;   -                   in the parent section definition
 ;;   - `:allow-condition': a condition that will be called during checking
-;;                         the allowed status of a node. It can be:
+;;                         the allowed status of a node.  It can be:
 ;;     - A function which will be called
 ;;     - A cons which will be wrapped in a lambda and called
 ;;     - A symbol whose value will be taken

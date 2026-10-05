@@ -99,6 +99,13 @@ BODY should be a test."
    (should-error
     (guard-section foo ()))))
 
+(ert-deftest guard-test-prototyping ()
+  "Test suppressing duplicate section error."
+  (guard-with-clean-state
+   (guard-start-prototyping)
+   (guard-section foo ())
+   (guard-section foo ())))
+
 (ert-deftest guard-test-disallow-overriding ()
   "Test overriding a disallow."
   (guard-with-clean-state

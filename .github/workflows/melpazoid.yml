@@ -22,7 +22,7 @@ jobs:
         pip install mypy
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
 
-   - name: Run
+    - name: Run
       env:
         LOCAL_REPO: ${{ github.workspace }}
         RECIPE: (guard :fetcher github :repo "Dspil/guard.el")

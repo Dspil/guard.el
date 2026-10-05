@@ -256,3 +256,11 @@ Guard provides built-in interactive commands for inspecting your configuration g
 
 - ~M-x guard-dot~ :: Opens the ~*guard-dot*~ buffer containing a Graphviz DOT representation of your configuration hierarchy, along with runtime execution details for each section.
 - ~M-x guard-look~ :: Inspects the status of a specific section along with its parent and child relationships.
+
+** Prototyping
+
+When refactoring parts of a config, it is common to run ~M-x eval-buffer~ to test it. This will throw an error when using ~guard.el~ because sections can't be defined more than once.
+
+This restriction is enforced to remove the possibility of creating cycles which make the semantics significantly harder.
+
+Still it is possible to suppress this error with ~M-x guard-start-prototyping~. After that, the error won't trigger on section redefinition. Do that sensibly. The default behavior can be reinstated with ~M-x guard-stop-prototyping~.

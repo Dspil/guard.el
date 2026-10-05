@@ -17,7 +17,8 @@ BODY should be a test."
          (guard--nodes-with-subgraph (make-hash-table))
          (guard--node-places (make-hash-table))
          (guard--node-docs (make-hash-table))
-         (guard--node-params (make-hash-table)))
+         (guard--node-params (make-hash-table))
+         (guard--prototyping nil))
      (guard-initialize)
      ,@body))
 
@@ -96,6 +97,23 @@ BODY should be a test."
   "Test throwing an error on duplicate sections."
   (guard-with-clean-state
    (guard-section foo ())
+   (should-error
+    (guard-section foo ()))))
+
+(ert-deftest guard-test-prototyping ()
+  "Test suppressing duplicate section error."
+  (guard-with-clean-state
+   (guard-start-prototyping)
+   (guard-section foo ())
+   (guard-section foo ())))
+
+(ert-deftest guard-test-stop-prototyping ()
+  "Test reenabling duplicate section error."
+  (guard-with-clean-state
+   (guard-start-prototyping)
+   (guard-section foo ())
+   (guard-section foo ())
+   (guard-stop-prototyping)
    (should-error
     (guard-section foo ()))))
 

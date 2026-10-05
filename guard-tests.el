@@ -108,7 +108,7 @@ BODY should be a test."
    (guard-section foo ())))
 
 (ert-deftest guard-test-stop-prototyping ()
-  "Test suppressing duplicate section error."
+  "Test reenabling duplicate section error."
   (guard-with-clean-state
    (guard-start-prototyping)
    (guard-section foo ())

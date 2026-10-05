@@ -722,13 +722,13 @@ PREV-HISTORY is holding history for the back button."
 ;; disable/enable duplicate section error
 
 (defun guard-start-prototyping ()
-  "Disables the duplicate-section error.  This should be used with caution since
+  "Disable the duplicate-section error.  This should be used with caution since
 with this enabled, it is possible to create circular dependencies."
   (interactive)
   (setq guard--prototyping t))
 
 (defun guard-stop-prototyping ()
-  "Enables the duplicate-section error again.  It is adviced to leave call
+  "Enable the duplicate-section error again.  It is adviced to leave call
 this after prototyping the config ends to catch possible circular
 dependencies in new parts of the configuration."
   (interactive)

@@ -320,7 +320,7 @@ updated with \='allowed or \='disallowed values for bulk operations."
         (allow-condition (guard--eval-allow-condition section)))
     (cond
      ((and parent-mode neg-default (not (eq neg-default from-child))) nil)
-     ((or (eq state 'allowed) (eq cached-state 'allowed) allow-condition)
+     ((or (eq state 'allowed) (eq cached-state 'allowed))
       (progn
         (when cache
           (setf (gethash section cache) 'allowed))

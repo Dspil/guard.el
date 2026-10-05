@@ -132,12 +132,14 @@ An example of a section with an explicit parent and parameter:
     (configure-org-roam))
 #+end_src
 
-A section can be configured to be allowed/disallowed by default with the ~allow-condition~:
+A section can be configured to have an ~allow-condition~:
 #+begin_src emacs-lisp
   (guard-section powershell (:allow-condition (eq system-type 'windows-nt))
     (use-package powershell
       :ensure t))
 #+end_src
+
+If the ~allow-condition~ evaluates to ~nil~ the section is disallowed by default.
 The ~allow-condition~ can be:
 - A function in which case it will be called whenever testing if the section is allowed.
 - A ~cons~ in which case it will be wrapped in a lambda and called when testing.
@@ -172,8 +174,8 @@ or implicitly by nesting ~guard-section~ blocks within each other:
 Allowed sections will run during initialization, while disallowed sections will not.
 
 *** Rules for Status
-- A section is *allowed* if it is *explicitly allowed* OR if *all* of its parents are allowed OR if its allow condition evaluates to t (OR shortcircuits here).
-- A section can also be *explicitly disallowed*, in which case it will not run.
+- A section is *allowed* if it is *explicitly allowed* OR if *all* of its parents are allowed (OR shortcircuits here).
+- A section can also be *explicitly disallowed* or its ~allow-condition~ might be ~nil~ in which case it will not run.
 - All sections are transitive children of ~guard-parent-node~, which is allowed by default. Therefore, with no extra configuration, all sections are allowed.
 - Explicitly allowing/disallowing a section affects all transitive dependencies of that section.
 

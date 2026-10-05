@@ -62,6 +62,16 @@
 ;;
 ;; If a section starts with a string, that acts as its doscstring.
 ;;
+;; <options> is a plist with available keys:
+;;   - `:parents': a list of parent sections
+;;   - `:default-child': for mutually exclusive nodes we pick the allowed one
+;;   -                   in the parent section definition
+;;   - `:allow-condition': a condition that will be called during checking
+;;                         the allowed status of a node.  It can be:
+;;     - A function which will be called
+;;     - A cons which will be wrapped in a lambda and called
+;;     - A symbol whose value will be taken
+;;
 ;; =============================================================================
 ;; 3. DEPENDENCIES & INHERITANCE
 ;; =============================================================================
@@ -96,7 +106,8 @@
 ;; Allowed sections will run during initialization and disallowed will not.
 ;;
 ;; A section is allowed either if it is *explicitly allowed* or if *all* of its
-;; parents are allowed.
+;; parents are allowed or if its allow condition evaluates to t (or
+;; shortcircuits here).
 ;; A section can also be *explicitly disallowed* in which case it is disallowed.
 ;;
 ;; All sections are transitive children of guard-parent-node which is by default
@@ -229,6 +240,7 @@
 (defvar guard--node-places (make-hash-table) "Links to node definitions.")
 (defvar guard--node-docs (make-hash-table) "Holds docstrings of sections.")
 (defvar guard--node-params (make-hash-table) "Holds parameter overrides of nodes.")
+(defvar guard--allow-conditions (make-hash-table) "Holds the allow conditions of nodes.")
 (defvar-local guard--node-look-history '() "History for back button in `guard-look'.")
 (defvar-local guard--node-looked nil "Section currently looked at.")
 (defvar guard-after-jump-to-section-functions nil
@@ -283,17 +295,29 @@ PARENT-MODE exists only for the recursive call and should not be set."
 ;; Helper functions
 ;; ================
 
+(defun guard--eval-allow-condition (section)
+  "Evaluate a default condition of a SECTION."
+  (let ((c (gethash section guard--allow-conditions)))
+    (cond
+     ((not c) t)
+     ((functionp c) (funcall c))
+     ((consp c) (funcall `(lambda () ,c)))
+     ((symbolp c) (symbol-value c))
+     (t c))))
+
 (defun guard--is-allowed (section &optional cache parent-mode from-child)
   "Check whether SECTION is allowed.
 CACHE is a hash-table with other sections found to be allowed.
 PARENT-MODE and FROM-CHILD are for the recursive call and should not be set.
-A section is allowed if it is explicitly set to be allowed or if *all* of its
-parents are allowed.  If a direct parent of the section is a negative node, it
-has to be explicitly allowed.  The CACHE should be a hash-table that also gets
+A section is allowed if it is explicitly set to be allowed, or its
+:allow-condition is true or if *all* of its parents are allowed.
+If a direct parent of the section is a negative node, it has
+to be explicitly allowed.  The CACHE should be a hash-table that also gets
 updated with \='allowed or \='disallowed values for bulk operations."
   (let ((state (gethash section guard--sections-allowed))
         (cached-state (when cache (gethash section cache)))
-        (neg-default (gethash section guard--neg-nodes)))
+        (neg-default (gethash section guard--neg-nodes))
+        (allow-condition (guard--eval-allow-condition section)))
     (cond
      ((and parent-mode neg-default (not (eq neg-default from-child))) nil)
      ((or (eq state 'allowed) (eq cached-state 'allowed))
@@ -301,7 +325,7 @@ updated with \='allowed or \='disallowed values for bulk operations."
         (when cache
           (setf (gethash section cache) 'allowed))
         t))
-     ((or (eq state 'disallowed) (eq cached-state 'disallowed))
+     ((or (eq state 'disallowed) (eq cached-state 'disallowed) (not allow-condition))
       (progn
         (when cache
           (setf (gethash section cache) 'disallowed))
@@ -334,7 +358,8 @@ BODY is arbitrary code."
         (type-over (gethash name guard--overrides))
         (parents (make-symbol "parents"))
         (start-time (make-symbol "start-time"))
-        (default-child (make-symbol "default-child")))
+        (default-child (make-symbol "default-child"))
+        (allow-condition (make-symbol "allow-condition")))
     (let ((section (if type-over
                        (let* ((where (car type-over))
                               (over (cdr type-over))
@@ -349,10 +374,13 @@ BODY is arbitrary code."
           (docstring (and body (stringp (car body)) (car body))))
       `(progn
          (let ((,parents (plist-get ',options :parents))
-               (,default-child (plist-get ',options :default-child)))
+               (,default-child (plist-get ',options :default-child))
+               (,allow-condition (plist-get ',options :allow-condition)))
            (when ,default-child
              (unless (gethash ',name guard--neg-nodes)
                (setf (gethash ',name guard--neg-nodes) ,default-child)))
+           (when ,allow-condition
+             (setf (gethash ',name guard--allow-conditions) ,allow-condition))
            (guard--graph-add-section ',name ,parents ,file))
          (setf (gethash ',name guard--node-docs) ,docstring)
          (when (guard--is-allowed ',name)

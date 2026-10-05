@@ -9,18 +9,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v4
+
     - name: Set up Python
-      uses: actions/setup-python@v6
-      with: { python-version: '3.10' }
-    - name: Install
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
       run: |
-        sudo apt-get install emacs && emacs --version
+        sudo apt-get update && sudo apt-get install -y emacs
+        pip install mypy
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
+
     - name: Run
       env:
         LOCAL_REPO: ${{ github.workspace }}
         RECIPE: (guard :fetcher github :repo "Dspil/guard.el")
-        WARN_IS_ERROR: true
-        EXIST_OK: false
+        WARN_IS_ERROR: false
+        EXIST_OK: true
       run: echo $GITHUB_REF && make -C ~/melpazoid

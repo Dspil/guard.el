@@ -1,3 +1,4 @@
+# melpazoid <https://github.com/riscy/melpazoid> build checks.
 name: melpazoid
 on:
   push:
@@ -9,19 +10,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-
+    - uses: actions/checkout@v6
     - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
+      uses: actions/setup-python@v6
+      with: { python-version: '3.10' }
+    - name: Install
       run: |
-        sudo apt-get update && sudo apt-get install -y emacs
-        pip install mypy
+        sudo apt-get install emacs && emacs --version
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
-
     - name: Run
       env:
         LOCAL_REPO: ${{ github.workspace }}
